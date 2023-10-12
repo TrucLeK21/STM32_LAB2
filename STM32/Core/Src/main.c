@@ -94,15 +94,39 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  setTimer1(100);
+  enum state { ONE, TWO};
+  enum state currentState = ONE;
+  enum state nextState = currentState;
+  setTimer1(50);
   while (1)
   {
     /* USER CODE END WHILE */
 	  if(timer1_flag == 1)
 	  {
-		  HAL_GPIO_TogglePin ( LED_RED_GPIO_Port , LED_RED_Pin );
-		  //TODO
-		  setTimer1(100);
+		  HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+		  switch (currentState)
+		  {
+		  	  case ONE:
+		  		  HAL_GPIO_WritePin(GPIOA, EN0_Pin, RESET);
+		  		  HAL_GPIO_WritePin(GPIOA, EN1_Pin, SET);
+		  		  HAL_GPIO_WritePin(GPIOB, SEG_B_Pin | SEG_C_Pin, RESET);
+		  		  HAL_GPIO_WritePin(GPIOB,
+		  				  SEG_A_Pin | SEG_D_Pin | SEG_E_Pin | SEG_F_Pin | SEG_G_Pin, SET);
+		  		  nextState = TWO;
+		  		  break;
+		  	  case TWO:
+		  		  HAL_GPIO_WritePin(GPIOA, EN0_Pin, SET);
+		  		  HAL_GPIO_WritePin(GPIOA, EN1_Pin, RESET);
+		  		  HAL_GPIO_WritePin(GPIOB, SEG_F_Pin | SEG_C_Pin, SET);
+		  		  HAL_GPIO_WritePin(GPIOB,
+		  				  SEG_A_Pin | SEG_D_Pin | SEG_E_Pin | SEG_B_Pin | SEG_G_Pin, RESET);
+		  		  nextState = ONE;
+		  		  break;
+		  	  default:
+		  		  break;
+		  }
+		  currentState = nextState;
+		  setTimer1(50);
 	  }
     /* USER CODE BEGIN 3 */
   }
@@ -200,16 +224,30 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_RED_Pin|EN0_Pin|EN1_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : LED_RED_Pin */
-  GPIO_InitStruct.Pin = LED_RED_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, SEG_A_Pin|SEG_B_Pin|SEG_C_Pin|SEG_D_Pin
+                          |SEG_E_Pin|SEG_F_Pin|SEG_G_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : LED_RED_Pin EN0_Pin EN1_Pin */
+  GPIO_InitStruct.Pin = LED_RED_Pin|EN0_Pin|EN1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED_RED_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : SEG_A_Pin SEG_B_Pin SEG_C_Pin SEG_D_Pin
+                           SEG_E_Pin SEG_F_Pin SEG_G_Pin */
+  GPIO_InitStruct.Pin = SEG_A_Pin|SEG_B_Pin|SEG_C_Pin|SEG_D_Pin
+                          |SEG_E_Pin|SEG_F_Pin|SEG_G_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
