@@ -27,23 +27,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000029  00000000  00000000  00020024  2**0
                   CONTENTS, READONLY
- 12 .debug_info   0000855d  00000000  00000000  0002004d  2**0
+ 12 .debug_info   00008581  00000000  00000000  0002004d  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 0000150e  00000000  00000000  000285aa  2**0
+ 13 .debug_abbrev 0000150e  00000000  00000000  000285ce  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 00000940  00000000  00000000  00029ab8  2**3
+ 14 .debug_aranges 00000940  00000000  00000000  00029ae0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_ranges 00000898  00000000  00000000  0002a3f8  2**3
+ 15 .debug_ranges 00000898  00000000  00000000  0002a420  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00016297  00000000  00000000  0002ac90  2**0
+ 16 .debug_macro  00016297  00000000  00000000  0002acb8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0000956f  00000000  00000000  00040f27  2**0
+ 17 .debug_line   0000956f  00000000  00000000  00040f4f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    00081f03  00000000  00000000  0004a496  2**0
+ 18 .debug_str    00081f11  00000000  00000000  0004a4be  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000053  00000000  00000000  000cc399  2**0
+ 19 .comment      00000053  00000000  00000000  000cc3cf  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00002610  00000000  00000000  000cc3ec  2**2
+ 20 .debug_frame  00002610  00000000  00000000  000cc424  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -429,8 +429,8 @@ static void MX_GPIO_Init(void)
  8000320:	40010c00 	.word	0x40010c00
 
 08000324 <HAL_TIM_PeriodElapsedCallback>:
-int counter1 = 50;
-int counter2 = 100;
+int counter1 = timer1;
+int counter2 = timer2;
 int status = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -458,9 +458,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  8000342:	2b00      	cmp	r3, #0
  8000344:	dc18      	bgt.n	8000378 <HAL_TIM_PeriodElapsedCallback+0x54>
 		  {
-			  counter1 = 50;
- 8000346:	4b18      	ldr	r3, [pc, #96]	; (80003a8 <HAL_TIM_PeriodElapsedCallback+0x84>)
- 8000348:	2232      	movs	r2, #50	; 0x32
+			  counter1 = timer1;
+ 8000346:	2219      	movs	r2, #25
+ 8000348:	4b17      	ldr	r3, [pc, #92]	; (80003a8 <HAL_TIM_PeriodElapsedCallback+0x84>)
  800034a:	601a      	str	r2, [r3, #0]
 			  HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
  800034c:	2120      	movs	r1, #32
@@ -513,9 +513,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  800038e:	2b00      	cmp	r3, #0
  8000390:	dc06      	bgt.n	80003a0 <HAL_TIM_PeriodElapsedCallback+0x7c>
 		  	 {
-		  		 counter2 = 100;
- 8000392:	4b08      	ldr	r3, [pc, #32]	; (80003b4 <HAL_TIM_PeriodElapsedCallback+0x90>)
- 8000394:	2264      	movs	r2, #100	; 0x64
+		  		 counter2 = timer2;
+ 8000392:	2264      	movs	r2, #100	; 0x64
+ 8000394:	4b07      	ldr	r3, [pc, #28]	; (80003b4 <HAL_TIM_PeriodElapsedCallback+0x90>)
  8000396:	601a      	str	r2, [r3, #0]
 		  		 HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
  8000398:	2110      	movs	r1, #16

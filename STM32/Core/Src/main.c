@@ -233,9 +233,12 @@ const int MAX_LED = 4;
 int index_led = 0;
 int led_buffer [4] = {1 , 2 , 3 , 4};
 
+// set timer1 to 250ms
+const int timer1 = 25;
+const int timer2 = 100;
 
-int counter1 = 50;
-int counter2 = 100;
+int counter1 = timer1;
+int counter2 = timer2;
 int status = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -246,7 +249,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		  counter1--;
 		  if(counter1 <= 0)
 		  {
-			  counter1 = 50;
+			  counter1 = timer1;
 			  HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
 
 			  update7SEG(status);
@@ -265,7 +268,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		  	 counter2--;
 		  	 if(counter2 <= 0)
 		  	 {
-		  		 counter2 = 100;
+		  		 counter2 = timer2;
 		  		 HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 		  	 }
 	  }
