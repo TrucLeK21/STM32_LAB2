@@ -226,11 +226,17 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
 void display7SEG(int number);
+void update7SEG(int index);
+
+const int MAX_LED = 4;
+int index_led = 0;
+int led_buffer [4] = {1 , 2 , 3 , 4};
+
+
 int counter1 = 50;
 int counter2 = 100;
-int status = 1;
+int status = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -242,46 +248,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		  {
 			  counter1 = 50;
 			  HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-			  switch (status)
+
+			  update7SEG(status);
+			  //next status
+			  status++;
+			  if(status >= MAX_LED)
 			  {
-			  	  case 1:
-			  		  // turn on led 0 and turn off led 1,2,3
-			  		  HAL_GPIO_WritePin(GPIOA, EN1_Pin | EN2_Pin | EN3_Pin, SET);
-			  		  HAL_GPIO_WritePin(GPIOA, EN0_Pin, RESET);
-			  		  // display number 1
-			  		  display7SEG(status);
-			  		  // next status
-			  		  status = 2;
-			  		  break;
-			  	  case 2:
-			  		  // turn on led 1 and turn off led 0,2,3
-			  		  HAL_GPIO_WritePin(GPIOA, EN0_Pin | EN2_Pin | EN3_Pin, SET);
-			  		  HAL_GPIO_WritePin(GPIOA, EN1_Pin, RESET);
-			  		  // display number 2
-			  		  display7SEG(status);
-			  		  // next status
-			  		  status = 3;
-			  		  break;
-			  	  case 3:
-			  		  // turn on led 2 and turn off led 0,1,3
-			  		  HAL_GPIO_WritePin(GPIOA, EN0_Pin | EN1_Pin | EN3_Pin, SET);
-			  		  HAL_GPIO_WritePin(GPIOA, EN2_Pin, RESET);
-			  		  // display number 3
-			  		  display7SEG(status);
-			  		  // next status
-			  		  status = 0;
-			  		  break;
-			  	  case 0:
-			  		  // turn on led 3 and turn off led 0,1,2
-			  		  HAL_GPIO_WritePin(GPIOA, EN0_Pin | EN1_Pin | EN2_Pin, SET);
-			  		  HAL_GPIO_WritePin(GPIOA, EN3_Pin, RESET);
-			  		  // display number 0
-			  		  display7SEG(status);
-			  		  // next status
-			  		  status = 1;
-			  		  break;
-			  	  default:
-			  		  break;
+				  status = 0;
 			  }
 		  }
 	  }
@@ -296,6 +269,41 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		  		 HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 		  	 }
 	  }
+}
+
+void update7SEG ( int index ) {
+	switch ( index ) {
+	  case 0:
+		  // turn on led 0 and turn off led 1,2,3
+		  HAL_GPIO_WritePin(GPIOA, EN1_Pin | EN2_Pin | EN3_Pin, SET);
+		  HAL_GPIO_WritePin(GPIOA, EN0_Pin, RESET);
+		  // display number 1
+		  display7SEG(led_buffer[index]);
+		  break;
+	  case 1:
+		  // turn on led 1 and turn off led 0,2,3
+		  HAL_GPIO_WritePin(GPIOA, EN0_Pin | EN2_Pin | EN3_Pin, SET);
+		  HAL_GPIO_WritePin(GPIOA, EN1_Pin, RESET);
+		  // display number 2
+		  display7SEG(led_buffer[index]);
+		  break;
+	  case 2:
+		  // turn on led 2 and turn off led 0,1,3
+		  HAL_GPIO_WritePin(GPIOA, EN0_Pin | EN1_Pin | EN3_Pin, SET);
+		  HAL_GPIO_WritePin(GPIOA, EN2_Pin, RESET);
+		  // display number 3
+		  display7SEG(led_buffer[index]);
+		  break;
+	  case 3:
+		  // turn on led 3 and turn off led 0,1,2
+		  HAL_GPIO_WritePin(GPIOA, EN0_Pin | EN1_Pin | EN2_Pin, SET);
+		  HAL_GPIO_WritePin(GPIOA, EN3_Pin, RESET);
+		  // display number 0
+		  display7SEG(led_buffer[index]);
+		  break;
+	  default:
+		  break;
+	}
 }
 
 void display7SEG(int number)
@@ -343,6 +351,7 @@ void display7SEG(int number)
 			break;
 	}
 }
+
 
 /* USER CODE END 4 */
 
