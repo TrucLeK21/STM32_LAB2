@@ -63,6 +63,18 @@ static void MX_GPIO_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
+const int MAX_LED = 4;
+int index_led = 0;
+int led_buffer [4] = {1 , 2 , 3 , 4};
+
+// set timer1 to 250ms
+const int timer1 = 25;
+const int timer2 = 100;
+
+int hour = 9 , minute = 8 , second = 50;
+
+void updateClockBuffer();
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -97,11 +109,29 @@ int main(void)
 
   while (1)
   {
-    /* USER CODE END WHILE */
+	  second++;
+	  if(second >= 60)
+	  {
+		  second = 0;
+		  minute++;
+	  }
 
-    /* USER CODE BEGIN 3 */
+	  if(minute >= 60)
+	  {
+		  minute = 0;
+		  hour++;
+	  }
+
+	  if(hour >= 24)
+	  {
+		  hour = 0;
+	  }
+
+	  updateClockBuffer();
+	  HAL_Delay(1000);
   }
   /* USER CODE END 3 */
+
 }
 
 /**
@@ -229,13 +259,7 @@ static void MX_GPIO_Init(void)
 void display7SEG(int number);
 void update7SEG(int index);
 
-const int MAX_LED = 4;
-int index_led = 0;
-int led_buffer [4] = {1 , 2 , 3 , 4};
 
-// set timer1 to 250ms
-const int timer1 = 25;
-const int timer2 = 100;
 
 int counter1 = timer1;
 int counter2 = timer2;
@@ -274,6 +298,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	  }
 }
 
+void updateClockBuffer()
+{
+	led_buffer[0] = hour / 10;
+	led_buffer[1] = hour % 10;
+
+	led_buffer[2] = minute / 10;
+	led_buffer[3] = minute % 10;
+}
 void update7SEG ( int index ) {
 	switch ( index ) {
 	  case 0:
