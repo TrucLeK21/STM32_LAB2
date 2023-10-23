@@ -94,40 +94,11 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  enum state { ONE, TWO};
-  enum state currentState = ONE;
-  enum state nextState = currentState;
-  setTimer1(50);
+
   while (1)
   {
     /* USER CODE END WHILE */
-	  if(timer1_flag == 1)
-	  {
-		  HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-		  switch (currentState)
-		  {
-		  	  case ONE:
-		  		  HAL_GPIO_WritePin(GPIOA, EN0_Pin, RESET);
-		  		  HAL_GPIO_WritePin(GPIOA, EN1_Pin, SET);
-		  		  HAL_GPIO_WritePin(GPIOB, SEG_B_Pin | SEG_C_Pin, RESET);
-		  		  HAL_GPIO_WritePin(GPIOB,
-		  				  SEG_A_Pin | SEG_D_Pin | SEG_E_Pin | SEG_F_Pin | SEG_G_Pin, SET);
-		  		  nextState = TWO;
-		  		  break;
-		  	  case TWO:
-		  		  HAL_GPIO_WritePin(GPIOA, EN0_Pin, SET);
-		  		  HAL_GPIO_WritePin(GPIOA, EN1_Pin, RESET);
-		  		  HAL_GPIO_WritePin(GPIOB, SEG_F_Pin | SEG_C_Pin, SET);
-		  		  HAL_GPIO_WritePin(GPIOB,
-		  				  SEG_A_Pin | SEG_D_Pin | SEG_E_Pin | SEG_B_Pin | SEG_G_Pin, RESET);
-		  		  nextState = ONE;
-		  		  break;
-		  	  default:
-		  		  break;
-		  }
-		  currentState = nextState;
-		  setTimer1(50);
-	  }
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -252,9 +223,45 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+int counter = 50;
+int status = 0;
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	timerRun();
+	  if(counter > 0)
+	  {
+		  counter--;
+		  if(counter <= 0)
+		  {
+			  counter  = 50;
+			  HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+			  switch (status)
+			  {
+			  	  case 0:
+			  		  // toggle enable0 and enable 1 pin
+			  		  HAL_GPIO_WritePin(GPIOA, EN0_Pin, RESET);
+			  		  HAL_GPIO_WritePin(GPIOA, EN1_Pin, SET);
+			  		  // display number 1
+			  		  HAL_GPIO_WritePin(GPIOB, SEG_B_Pin | SEG_C_Pin, RESET);
+			  		  HAL_GPIO_WritePin(GPIOB,
+			  				  SEG_A_Pin | SEG_D_Pin | SEG_E_Pin | SEG_F_Pin | SEG_G_Pin, SET);
+			  		  status = 1;
+			  		  break;
+			  	  case 1:
+			  		  // toggle enable0 and enable 1 pin
+			  		  HAL_GPIO_WritePin(GPIOA, EN0_Pin, SET);
+			  		  HAL_GPIO_WritePin(GPIOA, EN1_Pin, RESET);
+			  		  // display number 1
+			  		  HAL_GPIO_WritePin(GPIOB, SEG_F_Pin | SEG_C_Pin, SET);
+			  		  HAL_GPIO_WritePin(GPIOB,
+			  				  SEG_A_Pin | SEG_D_Pin | SEG_E_Pin | SEG_B_Pin | SEG_G_Pin, RESET);
+			  		  status = 0;
+			  		  break;
+			  	  default:
+			  		  break;
+			  }
+		  }
+	  }
 }
 /* USER CODE END 4 */
 
