@@ -107,7 +107,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  setTimer1(1);
+  setTimer1(100);
   setTimer2(timer2);
 
   while (1)
