@@ -231,7 +231,7 @@ void update7SEG(int index);
 
 const int MAX_LED = 4;
 int index_led = 0;
-int led_buffer [4] = {1 , 2 , 3 , 4};
+int led_buffer [4] = {5 , 6 , 7 , 8};
 
 
 int counter1 = 50;
