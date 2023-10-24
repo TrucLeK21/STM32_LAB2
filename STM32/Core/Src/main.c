@@ -67,13 +67,20 @@ const int MAX_LED = 4;
 int index_led = 0;
 int led_buffer [4] = {1 , 2 , 3 , 4};
 
-// set timer1 to 250ms
-const int timer1 = 25;
+// counter for second, minute, hour update
+const int timer1 = 1;
+
+// counter for DOT led
 const int timer2 = 100;
+
+// counter for scanning 4 7SEG leds
+const int timer3 = 25;
 
 int hour = 9 , minute = 8 , second = 50;
 
 void updateClockBuffer();
+void display7SEG(int number);
+void update7SEG(int index);
 
 int main(void)
 {
@@ -107,8 +114,13 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  setTimer1(1);
+  // initiate each timer
+  setTimer1(timer1);
   setTimer2(timer2);
+  setTimer3(timer3);
+
+  // status for 4 7SEG leds
+  int status = 1;
 
   while (1)
   {
@@ -133,7 +145,7 @@ int main(void)
 		  }
 
 		  updateClockBuffer();
-		  setTimer1(1);
+		  setTimer1(timer1);
 	  }
 
 	  if(timer2_flag == 1)
@@ -141,9 +153,22 @@ int main(void)
 		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 		  setTimer2(timer2);
 	  }
+
+	  if(timer3_flag == 1)
+	  {
+		  HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+		  update7SEG(status);
+
+		  //next status
+		  status++;
+		  if(status >= MAX_LED)
+		  {
+			  status = 0;
+		  }
+		  setTimer3(timer3);
+	  }
   }
   /* USER CODE END 3 */
-
 }
 
 /**
@@ -268,36 +293,10 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void display7SEG(int number);
-void update7SEG(int index);
-
-
-
-int counter1 = timer1;
-int status = 0;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	timerRun();
-
-	// timer1
-	  if(counter1 > 0)
-	  {
-		  counter1--;
-		  if(counter1 <= 0)
-		  {
-			  counter1 = timer1;
-			  HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-
-			  update7SEG(status);
-			  //next status
-			  status++;
-			  if(status >= MAX_LED)
-			  {
-				  status = 0;
-			  }
-		  }
-	  }
 }
 
 void updateClockBuffer()
