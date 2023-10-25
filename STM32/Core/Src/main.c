@@ -56,7 +56,29 @@ static void MX_GPIO_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+const int MAX_LED = 4;
+const int MAX_LED_MATRIX = 8;
 
+// counter for second, minute, hour update
+const int timer1 = 100;
+
+// counter for DOT led
+const int timer2 = 100;
+
+// counter for scanning leds
+const int timer3 = 10;
+
+// counter for shifting frame
+const int timer4 = 50;
+int hour = 9 , minute = 8 , second = 50;
+
+uint8_t matrix_buffer[8] = {0x00,0x3F,0x7F,0xCC,0xCC,0x7F,0x3F,0x00};
+
+void updateClockBuffer();
+void display7SEG(int number);
+void update7SEG(int index);
+void displayCol(int index);
+void updateLEDMatrix(int index);
 /* USER CODE END 0 */
 
 /**
@@ -94,11 +116,82 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  setTimer1(timer1);
+  setTimer2(timer2);
+  setTimer3(timer3);
+  setTimer4(timer4);
+
+  // status for 4 7SEG leds
+  int status = 0;
+  int index_led_matrix = 0;
+
   while (1)
   {
-    /* USER CODE END WHILE */
+	  if(timer1_flag == 1)
+	  {
+		  second++;
+		  if(second >= 60)
+		  {
+			  second = 0;
+			  minute++;
+		  }
 
-    /* USER CODE BEGIN 3 */
+		  if(minute >= 60)
+		  {
+			  minute = 0;
+			  hour++;
+		  }
+
+		  if(hour >= 24)
+		  {
+			  hour = 0;
+		  }
+
+		  updateClockBuffer();
+		  setTimer1(timer1);
+	  }
+
+	  if(timer2_flag == 1)
+	  {
+		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+		  setTimer2(timer2);
+	  }
+
+	  if(timer3_flag == 1)
+	  {
+		  HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+		  update7SEG(status);
+		  updateLEDMatrix(index_led_matrix);
+		  //next status
+		  status++;
+		  index_led_matrix++;
+		  if(status >= MAX_LED)
+		  {
+			  status = 0;
+		  }
+
+		  if(index_led_matrix >= MAX_LED_MATRIX)
+		  {
+			  index_led_matrix = 0;
+		  }
+
+		  setTimer3(timer3);
+	  }
+
+	  if(timer4_flag == 1)
+	  {
+		  	uint8_t temp = matrix_buffer[0];
+		  	int k;
+		    for (k = 0; k < MAX_LED_MATRIX - 1; k++) //shift the array values from point i
+		    {
+              matrix_buffer[k] = matrix_buffer[k+1];
+		    }
+
+		    matrix_buffer[k] = temp;
+
+		    setTimer4(timer4);
+	  }
   }
   /* USER CODE END 3 */
 }
@@ -237,6 +330,9 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+int led_buffer [4] = {1 , 2 , 3 , 4};
+
+uint16_t matrixRow [8] = {ROW0_Pin, ROW1_Pin, ROW2_Pin, ROW3_Pin, ROW4_Pin, ROW5_Pin, ROW6_Pin, ROW7_Pin};
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -251,6 +347,7 @@ void updateClockBuffer()
 	led_buffer[2] = minute / 10;
 	led_buffer[3] = minute % 10;
 }
+
 
 void update7SEG ( int index ) {
 	switch ( index ) {
@@ -333,31 +430,18 @@ void display7SEG(int number)
 	}
 }
 
-const int MAX_LED_MATRIX = 8;
-int index_led_matrix = 0;
-
-uint8_t matrix_buffer[8] = {0x01 , 0x02 , 0x03 , 0x04 , 0x05 , 0x06 , 0x07 , 0x08 };
 
 void displayCol(int index)
 {
-	uint8_t t = matrix_buffer[index];
-	uint8_t b;
+	int bit_pos = 1;
 	int pos = 7;
 
-	while (t != 0)
+	while (pos >= 0)
 	{
-	  b = t & 1;
-	  t = t >> 1;
-	  if (b == 1)
-		{
-		  // turn on a position in column
-
-		}
-		  else
-		{
-		  // turn off a position in column
-		}
-	  printf("\n");
+		// get each position of bit of each row value
+      HAL_GPIO_WritePin(GPIOB, matrixRow[pos], !(matrix_buffer[index] & bit_pos));
+      bit_pos = bit_pos*2;
+	  pos--;
 	}
 }
 
@@ -365,20 +449,44 @@ void updateLEDMatrix (int index ) {
 	switch( index )
 	{
 		case 0:
+			HAL_GPIO_WritePin(GPIOA, ENM0_Pin, 0);
+			HAL_GPIO_WritePin(GPIOA, ENM1_Pin | ENM2_Pin | ENM3_Pin | ENM4_Pin | ENM5_Pin | ENM6_Pin | ENM7_Pin, 1);
+			displayCol(index);
 			break;
 		case 1:
+			HAL_GPIO_WritePin(GPIOA, ENM1_Pin, 0);
+			HAL_GPIO_WritePin(GPIOA, ENM0_Pin | ENM2_Pin | ENM3_Pin | ENM4_Pin | ENM5_Pin | ENM6_Pin| ENM7_Pin, 1);
+			displayCol(index);
 			break;
 		case 2:
+			HAL_GPIO_WritePin(GPIOA, ENM2_Pin, 0);
+			HAL_GPIO_WritePin(GPIOA, ENM1_Pin | ENM0_Pin | ENM3_Pin | ENM4_Pin | ENM5_Pin | ENM6_Pin | ENM7_Pin, 1);
+			displayCol(index);
 			break;
 		case 3:
+			HAL_GPIO_WritePin(GPIOA, ENM3_Pin, 0);
+			HAL_GPIO_WritePin(GPIOA, ENM1_Pin | ENM2_Pin | ENM0_Pin | ENM4_Pin | ENM5_Pin | ENM6_Pin | ENM7_Pin, 1);
+			displayCol(index);
 			break;
 		case 4:
+			HAL_GPIO_WritePin(GPIOA, ENM4_Pin, 0);
+			HAL_GPIO_WritePin(GPIOA, ENM1_Pin | ENM2_Pin | ENM3_Pin | ENM0_Pin | ENM5_Pin | ENM6_Pin | ENM7_Pin, 1);
+			displayCol(index);
 			break;
 		case 5:
+			HAL_GPIO_WritePin(GPIOA, ENM5_Pin, 0);
+			HAL_GPIO_WritePin(GPIOA, ENM1_Pin | ENM2_Pin | ENM3_Pin | ENM4_Pin | ENM0_Pin | ENM6_Pin | ENM7_Pin, 1);
+			displayCol(index);
 			break;
 		case 6:
+			HAL_GPIO_WritePin(GPIOA, ENM6_Pin, 0);
+			HAL_GPIO_WritePin(GPIOA, ENM1_Pin | ENM2_Pin | ENM3_Pin | ENM4_Pin | ENM5_Pin | ENM0_Pin | ENM7_Pin, 1);
+			displayCol(index);
 			break;
 		case 7:
+			HAL_GPIO_WritePin(GPIOA, ENM7_Pin, 0);
+			HAL_GPIO_WritePin(GPIOA, ENM1_Pin | ENM2_Pin | ENM3_Pin | ENM4_Pin | ENM5_Pin | ENM6_Pin | ENM0_Pin, 1);
+			displayCol(index);
 			break;
 		default:
 			break;
