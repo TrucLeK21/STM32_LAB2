@@ -69,6 +69,9 @@ const int timer2 = 100;
 const int timer3 = 10;
 
 // counter for shifting frame
+const int timer4 = 50;
+
+
 int hour = 9 , minute = 8 , second = 50;
 
 uint8_t matrix_buffer[8] = {0x00,0x3F,0x7F,0xCC,0xCC,0x7F,0x3F,0x00};
@@ -119,6 +122,7 @@ int main(void)
   setTimer1(timer1);
   setTimer2(timer2);
   setTimer3(timer3);
+  setTimer4(timer4);
 
   // status for 4 7SEG leds
   int status = 0;
@@ -177,7 +181,19 @@ int main(void)
 		  setTimer3(timer3);
 	  }
 
+	  if(timer4_flag == 1)
+	  {
+		  	uint8_t temp = matrix_buffer[0];
+		  	int k;
+		    for (k = 0; k < MAX_LED_MATRIX - 1; k++) //shift the array values from point i
+		    {
+              matrix_buffer[k] = matrix_buffer[k+1];
+		    }
 
+		    matrix_buffer[k] = temp;
+
+		    setTimer4(timer4);
+	  }
   }
   /* USER CODE END 3 */
 }
